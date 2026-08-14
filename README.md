@@ -10,10 +10,15 @@ The SDK ships a prebuilt payment sheet you can present in a few lines, and a typ
 API client for integrations that need their own UI.
 
 > [!IMPORTANT]
-> **`1.0.0` is the first stable release.** The payment engine is sandbox-verified
-> end to end for card 3DS and QR wallet flows. A short list of documented
-> constraints still applies — read [Known limitations](#known-limitations) before
-> you ship to production.
+> **The current release is `1.0.2`.** The payment engine is sandbox-verified end
+> to end for card 3DS and QR wallet flows, through both CocoaPods and Swift
+> Package Manager. A short list of documented constraints still applies — read
+> [Known limitations](#known-limitations) before you ship to production.
+>
+> **If you integrated `1.0.0`, update.** Its payment method list could not be
+> scrolled, which made methods below the fold — including card — unreachable.
+> `~> 1.0` picks up the fix, but an existing `Podfile.lock` pins you until you
+> run `pod update`. See the [changelog](CHANGELOG.md).
 
 Table of contents
 =================
@@ -1009,19 +1014,34 @@ card numbers, CVCs or tokens.
 
 ## Testing
 
-Point at `.sandboxMode` and use the UQPAY test cards.
+Point at `.sandboxMode` and use the UQPAY test card.
 
-| Card number | Behaviour |
+| Field | Value |
 |---|---|
-| `5521970079998012` | 3D Secure enrolled — presents a challenge |
+| Number | `5521970079998012` |
+| Expiry | `10/2028` |
+| CVC | `001` |
+| Brand | Mastercard |
 
-3DS failure surfaces as intent status `REQUIRES_PAYMENT_METHOD` with the attempt's
-`failure_code` set to `3ds_failed`.
+This is the **only** 3DS-enrolled card in the sandbox. It authenticates
+frictionlessly, so expect **no challenge screen** — the ACS chain completes and
+returns to your app in a few seconds. That is a successful 3DS run, not a skipped
+one.
+
+Cards from the API quickstart that are not listed here are not enrolled: the ACS
+rejects them as outside its BIN range, and they can never succeed against a
+3DS-enforced intent.
+
+3DS failure surfaces as intent status `REQUIRES_PAYMENT_METHOD` — not `FAILED` —
+with the attempt's `failure_code` set to `3ds_failed`. A polling loop must treat
+`REQUIRES_PAYMENT_METHOD` as an answer rather than waiting for a terminal state.
 
 > [!WARNING]
-> **Sandbox QR wallets settle on real rails.** WeChat Pay, Alipay and GrabPay QR
-> codes generated in sandbox charge **real money** from the scanning wallet. Test
-> with penny amounts only.
+> **Card is the only sandbox flow that moves no money. Sandbox QR wallets settle
+> on real rails.** Alipay, WeChat Pay and GrabPay QR codes generated in sandbox
+> point at production wallet endpoints and charge **real money** from whichever
+> wallet scans them. Use card for repeated testing; if you must exercise a
+> wallet, use penny amounts.
 
 Run the SDK's own tests:
 
@@ -1046,8 +1066,8 @@ xcodebuild -workspace uqpay_ios_sdk.xcworkspace \
 
 ## Known limitations
 
-Honest list for `1.0.0`. These are known and documented, not undiscovered — each
-has a stated workaround, and they are the priorities for the next release:
+Honest list as of `1.0.2`. These are known and documented, not undiscovered —
+each has a stated workaround, and they are the priorities for the next release:
 
 | Area | Limitation |
 |---|---|
