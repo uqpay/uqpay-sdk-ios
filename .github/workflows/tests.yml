@@ -1,0 +1,149 @@
+name: Tests
+
+# Runs the three module suites on every push and PR so a regression cannot
+# reach a release branch unnoticed. The example-app UI tests are deliberately
+# excluded: they hit live sandbox rails that charge real money on QR wallets.
+#
+# The matrix covers iPhone *and* iPad. That is not decoration: the layout
+# suites (LayoutCompatibilityTests, ScrollWrapperBehaviourTests) assert against
+# both idioms and both orientations, and the dismissal path differs on iPad
+# where more than one window of the same app can be on screen.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The SDK's declared floor, kept in one place. Package.swift, the four
+  # podspecs and the three xcodeproj targets must all agree with this.
+  IOS_DEPLOYMENT_FLOOR: "15.0"
+
+jobs:
+  test:
+    name: ${{ matrix.scheme }} on ${{ matrix.idiom }}
+    runs-on: macos-15
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        scheme: [UqpayCore, UqpayPayments, UqpayPaymentSheet]
+        idiom: [iPhone, iPad]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode on the runner
+        run: |
+          XCODE="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          echo "Using $XCODE"
+          sudo xcode-select -s "$XCODE"
+
+      - name: Pick a ${{ matrix.idiom }} simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          # Model names change every Xcode release and do not sort by recency
+          # ("iPhone Air" vs "iPhone 17 Pro Max"), so this picks a *deterministic*
+          # device of the right idiom rather than pretending to pick the newest.
+          # The layout suites drive their own geometries in-process, so the
+          # specific model matters far less than the idiom being covered at all.
+          # Fails loudly if none exists, instead of silently falling back to
+          # whatever device happens to be first.
+          # Device names contain their own parentheses ("iPad mini (A17 Pro)"),
+          # so the UDID is stripped by its shape rather than by cutting at the
+          # first "(" — that truncation produces names no device matches.
+          NAME="$(xcrun simctl list devices available \
+            | grep -E "^ +${{ matrix.idiom }}" \
+            | sed -E 's/ \([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\).*$//' \
+            | sed 's/^ *//; s/ *$//' \
+            | sort -V | tail -1)"
+          if [ -z "$NAME" ]; then
+            echo "::error::No ${{ matrix.idiom }} simulator available on this runner"
+            exit 1
+          fi
+          echo "Using simulator: $NAME"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Test ${{ matrix.scheme }}
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -workspace uqpay_ios_sdk.xcworkspace \
+            -scheme "${{ matrix.scheme }}" \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            CODE_SIGNING_ALLOWED=NO
+
+  deployment-floor:
+    name: Deployment floor is consistent
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # The floor got to 14.0 in four podspecs and three projects without anyone
+      # noticing it had never been run. This makes drift a build failure rather
+      # than something discovered by a merchant.
+      - name: Every manifest declares the same floor
+        run: |
+          set -euo pipefail
+          FLOOR="${IOS_DEPLOYMENT_FLOOR}"
+          MAJOR="${FLOOR%%.*}"
+          FAILED=0
+
+          if ! grep -q "\.iOS(\.v${MAJOR})" Package.swift; then
+            echo "::error file=Package.swift::Package.swift does not declare .iOS(.v${MAJOR})"
+            FAILED=1
+          fi
+
+          for spec in *.podspec; do
+            if ! grep -q "deployment_target *= *\"${FLOOR}\"" "$spec"; then
+              echo "::error file=${spec}::${spec} does not declare ${FLOOR}"
+              FAILED=1
+            fi
+          done
+
+          for proj in UqpayCore UqpayPayments UqpayPaymentSheet; do
+            BAD="$(grep -o 'IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;' \
+              "${proj}/${proj}.xcodeproj/project.pbxproj" | sort -u \
+              | grep -v "= ${FLOOR};" || true)"
+            if [ -n "$BAD" ]; then
+              echo "::error::${proj} has targets off the floor: ${BAD}"
+              FAILED=1
+            fi
+          done
+
+          # CI runners only carry recent simulator runtimes, so the floor itself
+          # cannot be executed here. It is a manual gate on real hardware before
+          # a release, and this warning is the reminder that it is outstanding.
+          if ! xcrun simctl list runtimes | grep -q "iOS ${FLOOR}"; then
+            echo "::warning::No iOS ${FLOOR} runtime on this runner — the declared floor is verified by build only, not by execution. Run the suites on an iOS ${FLOOR} device before tagging a release."
+          fi
+
+          exit $FAILED
+
+  build-examples:
+    name: Example apps build
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode on the runner
+        run: |
+          XCODE="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          sudo xcode-select -s "$XCODE"
+
+      - name: Build UIKitExample and SwiftUIExample
+        run: |
+          set -o pipefail
+          for scheme in UIKitExample SwiftUIExample; do
+            xcodebuild build \
+              -workspace uqpay_ios_sdk.xcworkspace \
+              -scheme "$scheme" \
+              -destination "generic/platform=iOS Simulator" \
+              CODE_SIGNING_ALLOWED=NO
+          done

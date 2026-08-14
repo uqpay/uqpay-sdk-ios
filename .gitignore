@@ -1,0 +1,349 @@
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+## Build generated
+build/
+DerivedData/
+*.build/
+
+## Various settings
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xcuserstate
+# xcshareddata/ # Commented out - we need shared schemes
+
+## Other
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+#
+# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
+# Packages/
+# Package.pins
+Package.resolved
+.swiftpm/
+.build/
+
+# CocoaPods
+#
+# We recommend against adding the Pods directory to your .gitignore. However
+# you should judge for yourself, the pros and cons are mentioned at:
+# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
+#
+Pods/
+Podfile.lock
+
+# Carthage
+#
+# Add this line if you want to avoid checking in source code from Carthage dependencies.
+Carthage/Checkouts
+Carthage/Build/
+
+# Accio dependency management
+Dependencies/
+.accio/
+
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo.
+# Instead, use fastlane to re-generate the screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/#source-control
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+#
+# After new code Injection tools there's a generated folder /iOSInjectionProject
+# https://github.com/johnno1962/injectionforxcode
+
+iOSInjectionProject/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# IDE - VSCode
+.vscode/
+*.code-workspace
+
+# IDE - JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# IDE - Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# IDE - Vim
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# IDE - Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# IDE - TextMate
+*.tmproj
+*.tmproject
+tmtags
+
+# AppCode
+.idea/
+
+# Xcode Workspace State
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Xcode - User Interface State
+*.xcuserstate
+
+# Xcode - Breakpoints
+xcuserdata/*/xcdebugger/Breakpoints_v2.xcbkptlist
+*.xcworkspace/xcuserdata/*/xcdebugger/Breakpoints_v2.xcbkptlist
+
+# Xcode - Schemes
+# *.xcscheme # Commented out - we need shared schemes to be tracked
+# xcschememanagement.plist # Commented out - might be needed for scheme management
+# But exclude user-specific schemes:
+xcuserdata/*.xcscheme
+
+# Test Coverage
+*.xcresult
+*.gcno
+*.gcda
+*.profraw
+*.profdata
+coverage/
+xcov_report/
+
+# Documentation build artifacts
+.docc-build/
+build/documentation/
+*.doccarchive
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+tmp/
+temp/
+Temp/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Cache files
+.cache/
+*.cache
+
+# Python (if using scripts)
+*.py[cod]
+*$py.class
+__pycache__/
+.Python
+env/
+venv/
+.venv
+
+# Ruby (if using Ruby scripts/tools)
+*.gem
+.bundle/
+vendor/bundle/
+
+# Node.js (if using any JS tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm/
+.yarn/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Sensitive/Security files
+*.pem
+*.key
+*.cer
+*.crt
+*.p12
+*.p8
+*.mobileprovision
+*.provisionprofile
+
+# API Keys and Secrets
+secrets.json
+secrets.plist
+Config.xcconfig
+*.secrets
+
+# Build artifacts
+*.framework.zip
+*.xcframework.zip
+Products/
+output/
+dist/
+
+# Signing
+*.mobileprovision
+*.provisionprofile
+*.certSigningRequest
+
+# SPM artifacts
+.swiftpm/xcode/
+.swiftpm/xcshareddata/
+.swiftpm/xcuserdata/
+
+# Tuist
+Derived/
+Tuist/Dependencies
+graph.json
+
+# Buck
+buck-out/
+.buckconfig.local
+.buckd/
+
+# Bazel
+bazel-*
+
+# Jazzy documentation
+jazzy/
+undocumented.json
+
+# SwiftLint
+.swiftlint.yml.bak
+
+# SwiftFormat
+.swiftformat
+
+# Internal agent instructions — kept locally, never shipped in the public repo
+CLAUDE.md
+
+# Localization (if intermediate files exist)
+*.strings.new
+en.lproj/Localizable.strings.new
+
+# Instruments
+*.trace
+*.tracetemplate
+
+# Simulator logs
+~/Library/Logs/CoreSimulator/
+
+# Module maps (generated)
+*.modulemap
+
+# Index stores
+Index/
+.index-store/
+
+# SourceKit
+.sourcekit-lsp/
+
+# Resolved Package Dependencies (can be regenerated)
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# User-specific project settings
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Generated files
+Generated/
+*.generated.swift
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.Trash-*
+
+# Misc
+*.moved-aside
+*.xcuserstate
+*.xcscmblueprint
+# *.xcscheme # Already handled above
+*.orig
+# UQPAY demo credentials (real values live only in this untracked file)
+DemoSecrets.plist

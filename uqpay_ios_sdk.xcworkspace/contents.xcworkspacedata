@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <Group
+      location = "group:Examples"
+      name = "Examples">
+      <FileRef
+         location = "group:UIKitExample/UIKitExample.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:SwiftUIExample/SwiftUIExample.xcodeproj">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:UqpayPaymentSheet/UqpayPaymentSheet.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:UqpayPayments/UqpayPayments.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:UqpayCore/UqpayCore.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Package.swift">
+   </FileRef>
+   <FileRef
+      location = "group:README.md">
+   </FileRef>
+</Workspace>

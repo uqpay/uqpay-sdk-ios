@@ -1,0 +1,22 @@
+/*
+  Localizable.strings (en)
+
+  Keys are the English copy itself, so a missing entry always falls back
+  to exactly this wording. Generated from the source's localization calls.
+*/
+
+"Client secret format is invalid. Please check your client secret and try again." = "Client secret format is invalid. Please check your client secret and try again.";
+"Client secret is not configured. Please set UqpayConfiguration.shared.clientSecret before making API calls." = "Client secret is not configured. Please set UqpayConfiguration.shared.clientSecret before making API calls.";
+"Client secret must be a non-empty string with valid format" = "Client secret must be a non-empty string with valid format";
+"Client secret must be configured during app initialization" = "Client secret must be configured during app initialization";
+"Could not obtain an access token: %@" = "Could not obtain an access token: %@";
+"Ensure your client secret is properly formatted and not empty." = "Ensure your client secret is properly formatted and not empty.";
+"Environment is not configured. Please set UqpayConfiguration.shared.environment before making API calls." = "Environment is not configured. Please set UqpayConfiguration.shared.environment before making API calls.";
+"Environment must be configured during app initialization" = "Environment must be configured during app initialization";
+"Request failed with status %d." = "Request failed with status %d.";
+"Set UqpayConfiguration.shared.clientSecret = \"your_client_secret\" in your app's initialization code." = "Set UqpayConfiguration.shared.clientSecret = \"your_client_secret\" in your app's initialization code.";
+"Set UqpayConfiguration.shared.environment = .production (or other environment) in your app's initialization code." = "Set UqpayConfiguration.shared.environment = .production (or other environment) in your app's initialization code.";
+"The payment was cancelled." = "The payment was cancelled.";
+"The request timed out." = "The request timed out.";
+"The response from UQPAY could not be read." = "The response from UQPAY could not be read.";
+"UQPAY SDK is not configured: %@" = "UQPAY SDK is not configured: %@";

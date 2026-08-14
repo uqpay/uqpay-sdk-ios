@@ -1,0 +1,15 @@
+/*
+  Localizable.strings (en)
+
+  Keys are the English copy itself, so a missing entry always falls back
+  to exactly this wording. Generated from the source's localization calls.
+*/
+
+"Card number failed Luhn validation" = "Card number failed Luhn validation";
+"Card number is required" = "Card number is required";
+"Cardholder name is required" = "Cardholder name is required";
+"Expiry date is required" = "Expiry date is required";
+"Invalid card number" = "Invalid card number";
+"Invalid expiry date" = "Invalid expiry date";
+"Invalid security code" = "Invalid security code";
+"Security code is required" = "Security code is required";
