@@ -90,14 +90,14 @@ run.
 In Xcode, choose **File → Add Package Dependencies…** and enter:
 
 ```
-https://github.com/uqpay/uqpay-ios-sdk
+https://github.com/uqpay/uqpay-sdk-ios
 ```
 
 Or add it to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/uqpay/uqpay-ios-sdk", from: "1.0.0")
+    .package(url: "https://github.com/uqpay/uqpay-sdk-ios", from: "1.0.0")
 ]
 ```
 
@@ -107,7 +107,7 @@ Then add the products you need to your target:
 .target(
     name: "YourApp",
     dependencies: [
-        .product(name: "UqpaySDK", package: "uqpay-ios-sdk")
+        .product(name: "UqpaySDK", package: "uqpay-sdk-ios")
     ]
 )
 ```

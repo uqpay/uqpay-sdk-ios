@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UqpayCore"
-  s.version               = "1.0.1"
+  s.version               = "1.0.2"
   s.summary               = "Configuration, typed networking and credentials for the UQPAY iOS SDK."
   s.description           = <<-DESC
                             UqpayCore holds the pieces every other UQPAY module builds on:
@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.homepage              = "https://developer.uqpay.com"
   s.license               = { :type => "MIT", :file => "LICENSE" }
   s.authors               = { "UQPAY" => "developer@uqpay.com" }
-  s.source                = { :git => "https://github.com/uqpay/uqpay-ios-sdk.git", :tag => "#{s.version}" }
+  s.source                = { :git => "https://github.com/uqpay/uqpay-sdk-ios.git", :tag => "#{s.version}" }
   s.documentation_url     = "https://developer.uqpay.com"
 
   s.platform              = :ios

@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "uqpay_ios_sdk",
+    name: "uqpay-sdk-ios",
     defaultLocalization: "en",
     platforms: [
         .iOS(.v15)
