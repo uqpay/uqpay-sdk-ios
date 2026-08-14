@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name                  = "UqpaySDK"
+  s.name                  = "UqpayiOSSDK"
   s.version               = "1.0.0"
   s.summary               = "Accept card payments and regional QR wallets in your iOS app with UQPAY."
   s.description           = <<-DESC

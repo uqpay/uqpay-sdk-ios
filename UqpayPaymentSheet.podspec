@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
                             other regional wallets. It reports every outcome through one
                             `PaymentDelegate`.
 
-                            Most integrations should depend on `UqpaySDK`, which pulls this in
+                            Most integrations should depend on `UqpayiOSSDK`, which pulls this in
                             along with its two dependencies.
                             DESC
   s.homepage              = "https://developer.uqpay.com"

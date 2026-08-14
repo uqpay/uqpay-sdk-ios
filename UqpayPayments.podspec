@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
                             detection, and the device/browser information 3D Secure risk
                             scoring needs.
 
-                            Most integrations should depend on `UqpaySDK` instead, which pulls
+                            Most integrations should depend on `UqpayiOSSDK` instead, which pulls
                             this in along with the prebuilt payment sheet.
                             DESC
   s.homepage              = "https://developer.uqpay.com"

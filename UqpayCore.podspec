@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
                             environment and credential configuration, the typed HTTP client,
                             Keychain storage, the error taxonomy and logging.
 
-                            Most integrations should depend on `UqpaySDK` instead, which pulls
+                            Most integrations should depend on `UqpayiOSSDK` instead, which pulls
                             this in along with the payment models and the prebuilt payment sheet.
                             DESC
   s.homepage              = "https://developer.uqpay.com"
