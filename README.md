@@ -116,7 +116,7 @@ Then add the products you need to your target:
 
 ```ruby
 # Everything (recommended) — an umbrella pod that pulls in all three modules
-pod 'UqpayiOSSDK', '~> 1.0'
+pod 'UqpaySDKiOS', '~> 1.0'
 
 # Or pick individual modules — each brings its own dependencies
 pod 'UqpayCore',         '~> 1.0'
@@ -128,11 +128,16 @@ The three module pods pin each other to the exact same version, so mixing
 versions across them is not possible.
 
 > [!NOTE]
-> The CocoaPods umbrella is `UqpayiOSSDK`, while the Swift Package Manager
+> The CocoaPods umbrella is `UqpaySDKiOS`, while the Swift Package Manager
 > product above is `UqpaySDK`. The names differ because an unrelated, abandoned
 > `UQPAYSDK` pod from 2019 still occupies that name on CocoaPods trunk, whose
 > name matching is case-insensitive. The two are the same thing; only the
 > package-manager namespaces differ.
+>
+> `UqpayiOSSDK` was used briefly on the day of the 1.0.0 release and is now
+> deprecated in favour of `UqpaySDKiOS`. It still resolves, so an existing
+> Podfile keeps working, but switch when convenient. The three module pods
+> were never renamed.
 
 Each module is a separate pod because each is a separate Swift module, so the
 `import` statements are identical on both CocoaPods and Swift Package Manager.
@@ -144,7 +149,7 @@ Each module is a separate pod because each is a separate Swift module, so the
 | **UqpayCore** | Configuration, typed networking (`UqpayHTTPClient`), credentials, errors, logging. | — |
 | **UqpayPayments** | Payment models, confirm request/response types, card validation, device info. | UqpayCore |
 | **UqpayPaymentSheet** | The prebuilt payment UI: method list, card form, 3DS web step, QR wallet screens. | UqpayCore, UqpayPayments |
-| **UqpaySDK** (SPM) / **UqpayiOSSDK** (CocoaPods) | Umbrella containing all three. Ships no source of its own. | — |
+| **UqpaySDK** (SPM) / **UqpaySDKiOS** (CocoaPods) | Umbrella containing all three. Ships no source of its own. | — |
 
 > [!NOTE]
 > Apple Pay (`UqpayApplePay`) and the native in-app WeChat Pay hand-off

@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Every podspec's `s.source` now points at the new URL, so installs no longer
   depend on GitHub's rename redirect.
 
+- **The umbrella pod is renamed `UqpayiOSSDK` → `UqpaySDKiOS`**, to match the
+  repository name. `UqpayiOSSDK` is deprecated in favour of it and still
+  resolves, so an existing Podfile keeps building — but it will warn, and it
+  will not receive versions after 1.0.2.
+
+  ```ruby
+  pod 'UqpaySDKiOS', '~> 1.0'   # was: pod 'UqpayiOSSDK', '~> 1.0'
+  ```
+
+  **The three module pods are unaffected.** `UqpayCore`, `UqpayPayments` and
+  `UqpayPaymentSheet` keep their names, so anyone depending on them directly
+  rather than through the umbrella has nothing to change.
+
 > [!IMPORTANT]
 > **Swift Package Manager users must change two things, not one.** SwiftPM
 > derives a package's identity from the last component of its URL, so the
@@ -27,11 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > Updating only the URL fails to resolve.
 
 > [!NOTE]
-> **CocoaPods users need to change nothing.** Pod names — `UqpayCore`,
-> `UqpayPayments`, `UqpayPaymentSheet`, `UqpayiOSSDK` — are independent of the
-> repository name and are unchanged. Versions 1.0.0 and 1.0.1 are immutable and
-> still reference the old URL; they continue to resolve through GitHub's
-> permanent redirect.
+> **CocoaPods users change one line at most:** the umbrella pod name, if you use
+> it. Pod names are otherwise independent of the repository name, and the three
+> module pods are unchanged.
+>
+> Versions 1.0.0 and 1.0.1 are immutable and still reference the old repository
+> URL. They continue to resolve through GitHub's permanent redirect, which holds
+> as long as no new repository ever takes the name `uqpay-ios-sdk`.
 
 ## [1.0.1] — 2026-08-14
 
