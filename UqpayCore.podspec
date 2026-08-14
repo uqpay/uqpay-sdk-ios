@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UqpayCore"
-  s.version               = "1.0.0-rc.1"
+  s.version               = "1.0.0"
   s.summary               = "Configuration, typed networking and credentials for the UQPAY iOS SDK."
   s.description           = <<-DESC
                             UqpayCore holds the pieces every other UQPAY module builds on:

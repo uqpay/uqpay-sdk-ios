@@ -5,7 +5,11 @@ All notable changes to the UQPAY iOS SDK are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] — 2026-08-14
+
+First public release, and the first version published to CocoaPods and tagged
+for Swift Package Manager. The notes below cover everything that changed since
+the unpublished `1.0.0-rc.1` development cycle.
 
 ### Changed
 
@@ -161,13 +165,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0-rc.1] — 2026-08-12
+## 1.0.0-rc.1 — 2026-08-12 (never published)
 
-First public release candidate. The payment path is verified end to end against
-the sandbox for card 3DS and QR wallet flows.
+Release candidate that was tagged internally but never pushed to CocoaPods and
+never made available to integrators; its tag no longer exists. Kept here as a
+development record only — there is no version of this SDK before `1.0.0`.
 
-> **Not yet recommended for production.** See
-> [Known limitations](README.md#known-limitations).
+The payment path was verified end to end against the sandbox for card 3DS and
+QR wallet flows at this point.
 
 ### Added
 
@@ -390,5 +395,4 @@ the sandbox for card 3DS and QR wallet flows.
 - Credentials are no longer read from hardcoded literals in example code;
   `DemoSecrets.plist` is git-ignored.
 
-[Unreleased]: https://github.com/uqpay/uqpay-ios-sdk/compare/1.0.0-rc.1...HEAD
-[1.0.0-rc.1]: https://github.com/uqpay/uqpay-ios-sdk/releases/tag/1.0.0-rc.1
+[1.0.0]: https://github.com/uqpay/uqpay-ios-sdk/releases/tag/1.0.0

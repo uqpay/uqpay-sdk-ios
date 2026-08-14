@@ -10,9 +10,10 @@ The SDK ships a prebuilt payment sheet you can present in a few lines, and a typ
 API client for integrations that need their own UI.
 
 > [!IMPORTANT]
-> **This is a release candidate (`1.0.0-rc.1`).** The payment engine is
-> sandbox-verified end to end, but some public surfaces are still being finished —
-> see [Known limitations](#known-limitations) before you ship to production.
+> **`1.0.0` is the first stable release.** The payment engine is sandbox-verified
+> end to end for card 3DS and QR wallet flows. A short list of documented
+> constraints still applies — read [Known limitations](#known-limitations) before
+> you ship to production.
 
 Table of contents
 =================
@@ -92,12 +93,11 @@ In Xcode, choose **File → Add Package Dependencies…** and enter:
 https://github.com/uqpay/uqpay-ios-sdk
 ```
 
-Or add it to your `Package.swift`. Pin a release candidate exactly — SPM version
-ranges do not resolve pre-release versions:
+Or add it to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/uqpay/uqpay-ios-sdk", exact: "1.0.0-rc.1")
+    .package(url: "https://github.com/uqpay/uqpay-ios-sdk", from: "1.0.0")
 ]
 ```
 
@@ -114,18 +114,18 @@ Then add the products you need to your target:
 
 ### CocoaPods
 
-Pin a release candidate exactly — CocoaPods' optimistic operator (`~>`) skips
-pre-release versions:
-
 ```ruby
 # Everything (recommended) — an umbrella pod that pulls in all three modules
-pod 'UqpaySDK', '1.0.0-rc.1'
+pod 'UqpaySDK', '~> 1.0'
 
 # Or pick individual modules — each brings its own dependencies
-pod 'UqpayCore',         '1.0.0-rc.1'
-pod 'UqpayPayments',     '1.0.0-rc.1'
-pod 'UqpayPaymentSheet', '1.0.0-rc.1'
+pod 'UqpayCore',         '~> 1.0'
+pod 'UqpayPayments',     '~> 1.0'
+pod 'UqpayPaymentSheet', '~> 1.0'
 ```
+
+The three module pods pin each other to the exact same version, so mixing
+versions across them is not possible.
 
 Each module is a separate pod because each is a separate Swift module, so the
 `import` statements are identical on both CocoaPods and Swift Package Manager.
@@ -1034,7 +1034,8 @@ xcodebuild -workspace uqpay_ios_sdk.xcworkspace \
 
 ## Known limitations
 
-Honest list for `1.0.0-rc.1`. These are being addressed before `1.0.0`:
+Honest list for `1.0.0`. These are known and documented, not undiscovered — each
+has a stated workaround, and they are the priorities for the next release:
 
 | Area | Limitation |
 |---|---|

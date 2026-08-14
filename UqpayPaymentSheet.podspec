@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UqpayPaymentSheet"
-  s.version               = "1.0.0-rc.1"
+  s.version               = "1.0.0"
   s.summary               = "The prebuilt UQPAY payment UI: method list, card form, 3D Secure and QR wallets."
   s.description           = <<-DESC
                             UqpayPaymentSheet is the drop-in payment flow: the payment method
@@ -37,5 +37,9 @@ Pod::Spec.new do |s|
     "UqpayPaymentSheet_Privacy" => "UqpayPaymentSheet/UqpayPaymentSheet/PrivacyInfo.xcprivacy"
   }
 
+  # Both are declared explicitly even though UqpayPayments already pulls in
+  # UqpayCore: 11 files in this pod `import UqpayCore` directly, so the
+  # dependency is real and must not rest on UqpayPayments keeping its own.
+  s.dependency "UqpayCore", "#{s.version}"
   s.dependency "UqpayPayments", "#{s.version}"
 end

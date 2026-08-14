@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UqpayPayments"
-  s.version               = "1.0.0-rc.1"
+  s.version               = "1.0.0"
   s.summary               = "Payment models, card validation and device info for the UQPAY iOS SDK."
   s.description           = <<-DESC
                             UqpayPayments carries the payment domain: intent and confirm
