@@ -54,8 +54,14 @@ final class PaymentListViewController: UIViewController {
         table.backgroundColor = UqpayColors.surface
         table.separatorStyle = .none
         table.translatesAutoresizingMaskIntoConstraints = false
-        table.showsVerticalScrollIndicator = false
-        table.isScrollEnabled = false
+        // The table must scroll. `containerView` is pinned between the title and
+        // the Continue button, so its height is whatever the sheet leaves over —
+        // it cannot grow with the row count. With scrolling disabled the rows
+        // past that height were clipped by `containerView.clipsToBounds` and
+        // could not be reached at all: an account with a dozen wallets enabled
+        // lost every method below the fold, including `card`.
+        table.showsVerticalScrollIndicator = true
+        table.isScrollEnabled = true
         table.alwaysBounceVertical = false
         return table
     }()
@@ -187,6 +193,18 @@ final class PaymentListViewController: UIViewController {
         ])
     }
 
+    /// Returns `methods` with `card` pinned to the front, every other method
+    /// keeping the API's relative order.
+    ///
+    /// A stable partition rather than a sort: the API's ordering of the wallets
+    /// carries meaning the SDK has no basis to second-guess, so only `card`
+    /// moves.
+    static func cardFirst(_ methods: [PaymentMethod]) -> [PaymentMethod] {
+        let card = methods.filter { $0.type == .card }
+        let rest = methods.filter { $0.type != .card }
+        return card + rest
+    }
+
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
@@ -205,9 +223,14 @@ final class PaymentListViewController: UIViewController {
         Task { @MainActor in
             do {
                 let apiClient = try ApiClient.forConfiguredEnvironment()
-                // The list, its membership and its order come from the payment
-                // intent's available_payment_method_types — nothing client-side.
-                self.paymentMethods = try await apiClient.getPaymentMethods()
+                // Membership comes from the payment intent's
+                // available_payment_method_types — the SDK never adds or removes
+                // a method. Order is the one thing it does impose: `card` is
+                // pinned first, then the QR wallets in the order the API gave
+                // them. Card is the method most customers reach for, and the
+                // API's order is arbitrary enough that it has landed below the
+                // fold on accounts with many wallets enabled.
+                self.paymentMethods = Self.cardFirst(try await apiClient.getPaymentMethods())
 
                 if let firstMethod = self.paymentMethods.first {
                     self.selectedPaymentMethod = firstMethod

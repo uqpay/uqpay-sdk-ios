@@ -5,6 +5,34 @@ All notable changes to the UQPAY iOS SDK are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-08-14
+
+### Fixed
+
+- **The payment method list could not be scrolled, making methods below the
+  fold unreachable — including `card`.** `PaymentListViewController` pins its
+  container between the title and the Continue button, so the container's
+  height is whatever the sheet leaves over and cannot grow with the row count.
+  The table view inside it was pinned to all four container edges with
+  `isScrollEnabled = false`, so every row past that height was clipped by
+  `clipsToBounds` with no way to reach it. On a merchant account with a dozen
+  wallets enabled the customer could not select card at all. The table now
+  scrolls.
+
+  `LayoutCompatibilityTests.testPaymentListIsReachable` did not catch this: it
+  renders the screen with an empty method list, and with no rows there is
+  nothing to clip. The new `PaymentListOrderingTests.testTheMethodListScrolls`
+  supplies the missing coverage.
+
+### Changed
+
+- **`card` is now pinned to the top of the payment method list.** The order
+  previously came straight from the payment intent's
+  `available_payment_method_types`, which placed card below several wallets.
+  This is a stable partition, not a sort: only `card` moves, and the wallets
+  keep the relative order the API sent. Membership is still entirely the API's
+  — the SDK adds and removes nothing.
+
 ## [1.0.0] — 2026-08-14
 
 First public release, and the first version published to CocoaPods and tagged
@@ -395,4 +423,5 @@ QR wallet flows at this point.
 - Credentials are no longer read from hardcoded literals in example code;
   `DemoSecrets.plist` is git-ignored.
 
+[1.0.1]: https://github.com/uqpay/uqpay-ios-sdk/releases/tag/1.0.1
 [1.0.0]: https://github.com/uqpay/uqpay-ios-sdk/releases/tag/1.0.0
