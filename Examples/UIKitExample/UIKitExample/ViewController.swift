@@ -351,7 +351,10 @@ class ViewController: UIViewController {
 // MARK: - PaymentDelegate Implementation
 extension ViewController: PaymentDelegate {
     func paymentSheet(_ paymentSheet: PaymentSheet, didCompleteWithResult result: PaymentResult) {
-        print("Payment succeeded: \(result.paymentIntentId) (\(result.paymentMethodType)) \(result.amount) \(result.currency)")
+        // `amountDecimal` is the API's amount parsed exactly; nil only if the
+        // API value could not be parsed, which the SDK logs.
+        let amount = result.amountDecimal.map { "\($0)" } ?? "unknown"
+        print("Payment succeeded: \(result.paymentIntentId) (\(result.paymentMethodType)) \(amount) \(result.currency)")
 
         DispatchQueue.main.async { [weak self] in
             self?.viewModel.resultText = "✅ Payment Success! (\(result.paymentMethodType))"
@@ -359,7 +362,7 @@ extension ViewController: PaymentDelegate {
                 title: "Payment Successful",
                 message: "Payment ID: \(result.paymentIntentId)\n" +
                         "Method: \(result.paymentMethodType)\n" +
-                        "Amount: \(result.amount) \(result.currency)"
+                        "Amount: \(amount) \(result.currency)"
             )
         }
     }

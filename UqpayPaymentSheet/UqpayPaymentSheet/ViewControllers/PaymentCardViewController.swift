@@ -100,6 +100,7 @@ final class PaymentCardViewController: UIViewController {
     private func reportPendingToMerchant(
         paymentIntentId: String,
         amount: Double,
+        amountDecimal: Decimal? = nil,
         currency: String,
         merchantOrderId: String? = nil,
         status: PaymentStatus
@@ -114,15 +115,18 @@ final class PaymentCardViewController: UIViewController {
                 amount: amount,
                 currency: currency,
                 merchantOrderId: merchantOrderId,
-                transactionId: paymentIntentId
+                transactionId: paymentIntentId,
+                amountDecimal: amountDecimal
             )
         )
     }
 
     private func reportPendingToMerchant(response: ConfirmPaymentIntentResponse, status: PaymentStatus) {
+        let wireAmount = WireAmount.parse(response.amount, paymentIntentId: response.paymentIntentId)
         reportPendingToMerchant(
             paymentIntentId: response.paymentIntentId,
-            amount: Double(response.amount) ?? 0,
+            amount: wireAmount.double,
+            amountDecimal: wireAmount.decimal,
             currency: response.currency,
             merchantOrderId: response.merchantOrderId,
             status: status
@@ -1653,15 +1657,17 @@ final class PaymentCardViewController: UIViewController {
                                 // path may already have reported.
                                 if self.resolvedPaymentIntentIds.insert(intent.paymentIntentId).inserted,
                                    let delegate = self.paymentDelegate {
+                                    let wireAmount = WireAmount.parse(intent.amount, paymentIntentId: intent.paymentIntentId)
                                     let result = PaymentResult(
                                         paymentIntentId: intent.paymentIntentId,
                                         paymentMethodType: "card",
                                         status: .succeeded,
-                                        amount: intent.amount.flatMap(Double.init) ?? 0,
+                                        amount: wireAmount.double,
                                         currency: intent.currency ?? "",
                                         merchantOrderId: intent.merchantOrderId,
                                         completedAt: Date(),
-                                        transactionId: intent.paymentIntentId
+                                        transactionId: intent.paymentIntentId,
+                                        amountDecimal: wireAmount.decimal
                                     )
                                     delegate.paymentSheet(self.reportingSheet, didCompleteWithResult: result)
                                 }
@@ -1698,9 +1704,11 @@ final class PaymentCardViewController: UIViewController {
                                 // The transfer has not reached us yet
                                 // — an honest "pending", never a
                                 // fabricated receipt.
+                                let wireAmount = WireAmount.parse(intent.amount, paymentIntentId: intent.paymentIntentId)
                                 self.reportPendingToMerchant(
                                     paymentIntentId: intent.paymentIntentId,
-                                    amount: intent.amount.flatMap(Double.init) ?? 0,
+                                    amount: wireAmount.double,
+                                    amountDecimal: wireAmount.decimal,
                                     currency: intent.currency ?? "",
                                     merchantOrderId: intent.merchantOrderId,
                                     status: .pending
@@ -2253,16 +2261,18 @@ final class PaymentCardViewController: UIViewController {
             // this screen knows more than the response does: the method is
             // "card" even when the response omits it, and the authorization
             // completed *now*, whether or not `complete_time` is set yet.
+            let wireAmount = WireAmount.parse(response.amount, paymentIntentId: response.paymentIntentId)
             let paymentResult = PaymentResult(
                 paymentIntentId: response.paymentIntentId,
                 paymentMethodType: response.paymentMethod?.type ?? "card",
                 status: .succeeded,
-                amount: Double(response.amount) ?? 0,
+                amount: wireAmount.double,
                 currency: response.currency,
                 metadata: response.metadata,
                 merchantOrderId: response.merchantOrderId,
                 completedAt: Date(),
-                transactionId: response.latestPaymentAttempt?.attemptId
+                transactionId: response.latestPaymentAttempt?.attemptId,
+                amountDecimal: wireAmount.decimal
             )
             delegate.paymentSheet(self.reportingSheet, didCompleteWithResult: paymentResult)
         }
@@ -3001,15 +3011,19 @@ extension PaymentCardViewController {
             // exactly once.
             if resolvedPaymentIntentIds.insert(intent.paymentIntentId).inserted,
                let delegate = paymentDelegate {
+                let wireAmount = WireAmount.parse(
+                    intent.amount, fallback: amount, paymentIntentId: intent.paymentIntentId
+                )
                 let result = PaymentResult(
                     paymentIntentId: intent.paymentIntentId,
                     paymentMethodType: "card",
                     status: .succeeded,
-                    amount: intent.amount.flatMap(Double.init) ?? Double(amount) ?? 0,
+                    amount: wireAmount.double,
                     currency: intent.currency ?? "",
                     merchantOrderId: intent.merchantOrderId,
                     completedAt: Date(),
-                    transactionId: intent.paymentIntentId
+                    transactionId: intent.paymentIntentId,
+                    amountDecimal: wireAmount.decimal
                 )
                 delegate.paymentSheet(self.reportingSheet, didCompleteWithResult: result)
             }

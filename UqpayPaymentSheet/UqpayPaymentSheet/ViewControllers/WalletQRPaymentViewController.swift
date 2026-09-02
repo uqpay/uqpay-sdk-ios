@@ -519,15 +519,17 @@ final class WalletQRPaymentViewController: UIViewController {
             let displayAmount = [intent.amount, intent.currency].compactMap { $0 }.joined(separator: " ")
 
             if let delegate = paymentDelegate {
+                let wireAmount = WireAmount.parse(intent.amount, paymentIntentId: intent.paymentIntentId)
                 let result = PaymentResult(
                     paymentIntentId: intent.paymentIntentId,
                     paymentMethodType: descriptor.methodType,
                     status: .succeeded,
-                    amount: intent.amount.flatMap(Double.init) ?? 0,
+                    amount: wireAmount.double,
                     currency: intent.currency ?? "",
                     merchantOrderId: intent.merchantOrderId,
                     completedAt: Date(),
-                    transactionId: intent.paymentIntentId
+                    transactionId: intent.paymentIntentId,
+                    amountDecimal: wireAmount.decimal
                 )
                 delegate.paymentSheet(self.reportingSheet, didCompleteWithResult: result)
             }
@@ -663,13 +665,15 @@ final class WalletQRPaymentViewController: UIViewController {
 
     private func reportPendingOutcome(intentId: String) {
         guard let delegate = paymentDelegate else { return }
+        let wireAmount = WireAmount.parse(paymentIntentAmount, paymentIntentId: intentId)
         let result = PaymentResult(
             paymentIntentId: intentId,
             paymentMethodType: descriptor.methodType,
             status: .pending,
-            amount: paymentIntentAmount.flatMap(Double.init) ?? 0,
+            amount: wireAmount.double,
             currency: paymentIntentCurrency ?? "",
-            transactionId: intentId
+            transactionId: intentId,
+            amountDecimal: wireAmount.decimal
         )
         delegate.paymentSheet(reportingSheet, paymentDidBecomePending: result)
     }
@@ -684,15 +688,17 @@ final class WalletQRPaymentViewController: UIViewController {
         case "SUCCEEDED":
             walletConfirm.attemptFinished(intentId: response.paymentIntentId, methodType: descriptor.methodType)
             if let delegate = paymentDelegate {
+                let wireAmount = WireAmount.parse(response.amount, paymentIntentId: response.paymentIntentId)
                 let result = PaymentResult(
                     paymentIntentId: response.paymentIntentId,
                     paymentMethodType: descriptor.methodType,
                     status: .succeeded,
-                    amount: Double(response.amount) ?? 0,
+                    amount: wireAmount.double,
                     currency: response.currency,
                     merchantOrderId: response.merchantOrderId,
                     completedAt: Date(),
-                    transactionId: response.paymentIntentId
+                    transactionId: response.paymentIntentId,
+                    amountDecimal: wireAmount.decimal
                 )
                 delegate.paymentSheet(reportingSheet, didCompleteWithResult: result)
             }

@@ -97,6 +97,8 @@ final class ConfirmStatusReportingTests: XCTestCase {
 
         XCTAssertEqual(delegate.completed.count, 1)
         XCTAssertEqual(delegate.totalOutcomes, 1)
+        XCTAssertEqual(delegate.completed.first?.amountDecimal, Decimal(string: "8.98"),
+                       "The confirm-success site must carry the exact amount")
 
         card.handleFlowDismissal()
         XCTAssertEqual(delegate.cancelled, 0, "A completed payment must not also report a cancellation")
@@ -183,6 +185,8 @@ final class ConfirmStatusReportingTests: XCTestCase {
         XCTAssertTrue(intercepted, "a settled payment must not be confirmed again")
         XCTAssertEqual(delegate.completed.count, 1)
         XCTAssertEqual(delegate.totalOutcomes, 1)
+        XCTAssertEqual(delegate.completed.first?.amountDecimal, Decimal(string: "8.98"),
+                       "The reconciled-outcome site must carry the exact amount")
     }
 
     func testInterceptReportsACancelledIntentAsAFailure() {
@@ -218,6 +222,8 @@ final class ConfirmStatusReportingTests: XCTestCase {
         XCTAssertEqual(delegate.pending.count, 1)
         XCTAssertEqual(delegate.pending.first?.status, .pending)
         XCTAssertEqual(delegate.pending.first?.paymentIntentId, "pi_test_123")
+        XCTAssertEqual(delegate.pending.first?.amountDecimal, Decimal(string: "8.98"),
+                       "The confirm-pending site must carry the exact amount")
         XCTAssertEqual(delegate.completed.count, 0, "Pending must never masquerade as success")
         XCTAssertEqual(delegate.failed.count, 0, "Pending must never masquerade as failure")
     }

@@ -262,15 +262,17 @@ final class PaymentCardRawQRViewController: UIViewController {
 
     private func reportSuccess(paymentIntentId: String, amount: String?, currency: String?, merchantOrderId: String?) {
         guard let delegate = paymentDelegate else { return }
+        let wireAmount = WireAmount.parse(amount, paymentIntentId: paymentIntentId)
         let result = PaymentResult(
             paymentIntentId: paymentIntentId,
             paymentMethodType: PaymentMethodType.card.rawValue,
             status: .succeeded,
-            amount: amount.flatMap(Double.init) ?? 0,
+            amount: wireAmount.double,
             currency: currency ?? "",
             merchantOrderId: merchantOrderId,
             completedAt: Date(),
-            transactionId: paymentIntentId
+            transactionId: paymentIntentId,
+            amountDecimal: wireAmount.decimal
         )
         delegate.paymentSheet(reportingSheet, didCompleteWithResult: result)
     }
@@ -290,13 +292,15 @@ final class PaymentCardRawQRViewController: UIViewController {
 
     private func reportPendingOutcome(paymentIntentId: String, amount: String?, currency: String?) {
         guard let delegate = paymentDelegate else { return }
+        let wireAmount = WireAmount.parse(amount, paymentIntentId: paymentIntentId)
         let result = PaymentResult(
             paymentIntentId: paymentIntentId,
             paymentMethodType: PaymentMethodType.card.rawValue,
             status: .pending,
-            amount: amount.flatMap(Double.init) ?? 0,
+            amount: wireAmount.double,
             currency: currency ?? "",
-            transactionId: paymentIntentId
+            transactionId: paymentIntentId,
+            amountDecimal: wireAmount.decimal
         )
         delegate.paymentSheet(reportingSheet, paymentDidBecomePending: result)
     }

@@ -5,6 +5,42 @@ All notable changes to the UQPAY iOS SDK are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+What a merchant on 1.0.x sees after updating: nothing changes shape.
+`PaymentResult.amount` still works and now carries a deprecation warning;
+`PaymentResult.amountDecimal` is the value to move to.
+
+### Added
+
+- **`PaymentResult.amountDecimal: Decimal?`** — the API's amount, a decimal
+  string in major units such as `"8.98"`, parsed exactly. Use it for
+  arithmetic, cents conversion and comparison: `amountDecimal * 100` for
+  `"19.99"` is exactly `1999`. It is `nil` only when the API supplied no
+  amount or one that is not a plain decimal string, and it is never derived
+  from the `Double`. Every result the prebuilt sheet reports — card confirm,
+  3D Secure, pending, reconciliation, card QR and wallet QR — carries it, as
+  does the public `PaymentResult(from:)` initializer. The memberwise
+  initializer gains a trailing `amountDecimal:` parameter with a `nil`
+  default, so existing call sites compile unchanged.
+
+### Deprecated
+
+- **`PaymentResult.amount: Double`.** Binary floating point cannot represent
+  most decimal amounts: `Double("19.99") * 100` is `1998.9999999999998`, and
+  truncating it to cents gives 1998. The property keeps returning exactly what
+  it returned in 1.0.x — including `0` when the API value cannot be parsed —
+  and will be removed in 2.0.
+
+### Fixed
+
+- **An unparseable amount was reported as `0` silently.** Every site that
+  built a `PaymentResult` fell back to `0` when the API's amount string could
+  not be parsed, so a succeeded payment could reach the merchant with an
+  amount of zero and no trace. The `Double` still falls back to `0` (nothing
+  a merchant relies on moves), `amountDecimal` is `nil`, and the SDK now
+  writes an error-level log line naming the intent and the raw value.
+
 ## [1.0.3] — 2026-09-02
 
 ### Fixed

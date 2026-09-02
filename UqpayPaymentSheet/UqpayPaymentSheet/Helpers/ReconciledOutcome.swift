@@ -41,15 +41,17 @@ enum ReconciledOutcome {
 
     /// The result reported for an intent whose authorization succeeded.
     static func successResult(for intent: UqpayPaymentIntent) -> PaymentResult {
-        PaymentResult(
+        let wireAmount = WireAmount.parse(intent.amount, paymentIntentId: intent.paymentIntentId)
+        return PaymentResult(
             paymentIntentId: intent.paymentIntentId,
             paymentMethodType: "card",
             status: .succeeded,
-            amount: intent.amount.flatMap(Double.init) ?? 0,
+            amount: wireAmount.double,
             currency: intent.currency ?? "",
             merchantOrderId: intent.merchantOrderId,
             completedAt: Date(),
-            transactionId: intent.paymentIntentId
+            transactionId: intent.paymentIntentId,
+            amountDecimal: wireAmount.decimal
         )
     }
 

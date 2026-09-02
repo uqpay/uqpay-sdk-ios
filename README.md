@@ -381,7 +381,11 @@ extension CheckoutViewController: PaymentDelegate {
 
     func paymentSheet(_ paymentSheet: PaymentSheet, didCompleteWithResult result: PaymentResult) {
         // A UI signal. Confirm server-side from the webhook before fulfilling.
-        print("Paid \(result.amount) \(result.currency), intent \(result.paymentIntentId)")
+        // `amountDecimal` is the API's amount parsed exactly — use it for any
+        // arithmetic or cents conversion. It is nil only if the API value
+        // could not be parsed, which the SDK logs.
+        let paid = result.amountDecimal.map { "\($0)" } ?? "unknown"
+        print("Paid \(paid) \(result.currency), intent \(result.paymentIntentId)")
     }
 
     func paymentSheet(_ paymentSheet: PaymentSheet, didFailWithError error: PaymentError) {
@@ -433,7 +437,8 @@ extension CheckoutViewController: PaymentDelegate {
 | `paymentIntentId` | `String` |
 | `paymentMethodType` | `String` — `"card"`, `"grabpay"`, `"wechatpay"`, … |
 | `status` | `PaymentStatus` |
-| `amount` | `Double` |
+| `amountDecimal` | `Decimal?` — the API's amount parsed exactly; use it for arithmetic and cents conversion. `nil` only if the API value could not be parsed (logged). |
+| `amount` | `Double` — **deprecated**: binary floating point cannot represent money exactly (`19.99 * 100` is `1998.99…`). Still works; use `amountDecimal`. |
 | `currency` | `String` |
 | `merchantOrderId` | `String?` |
 | `transactionId` | `String?` |
@@ -491,7 +496,8 @@ final class PaymentHandler: ObservableObject, PaymentDelegate {
     @Published var message = ""
 
     nonisolated func paymentSheet(_ paymentSheet: PaymentSheet, didCompleteWithResult result: PaymentResult) {
-        Task { @MainActor in message = "Paid \(result.amount) \(result.currency)" }
+        let paid = result.amountDecimal.map { "\($0)" } ?? "unknown"
+        Task { @MainActor in message = "Paid \(paid) \(result.currency)" }
     }
 
     nonisolated func paymentSheet(_ paymentSheet: PaymentSheet, didFailWithError error: PaymentError) {

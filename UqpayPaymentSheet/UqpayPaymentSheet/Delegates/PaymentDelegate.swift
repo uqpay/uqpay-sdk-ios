@@ -22,8 +22,24 @@ public struct PaymentResult {
     /// The status of the payment
     public let status: PaymentStatus
 
-    /// The amount that was charged or attempted
-    public let amount: Double
+    /// The amount that was charged or attempted, as a floating-point value.
+    ///
+    /// Binary floating point cannot represent most decimal amounts exactly:
+    /// `Double("19.99") * 100` is `1998.9999999999998`, and truncating it to
+    /// cents gives 1998. Use ``amountDecimal`` for arithmetic, cents
+    /// conversion and comparison. This property keeps working as it always
+    /// has; it is `0` when the API supplied no amount or one that could not
+    /// be parsed.
+    @available(*, deprecated, message: "Binary floating point cannot represent money exactly; use amountDecimal.")
+    public var amount: Double { legacyAmount }
+
+    /// ``amount`` as the API sent it — a decimal string in major units such as
+    /// `"8.98"` — parsed exactly. Use this for arithmetic, cents conversion and
+    /// comparison: `amountDecimal * 100` for `"19.99"` is exactly `1999`.
+    ///
+    /// `nil` when the API supplied no amount or one that is not a plain decimal
+    /// string; the sheet logs that case. Never derived from ``amount``.
+    public let amountDecimal: Decimal?
 
     /// The currency code (e.g., "SGD", "USD")
     public let currency: String
@@ -43,6 +59,14 @@ public struct PaymentResult {
     /// Optional receipt URL if available
     public let receiptUrl: String?
 
+    /// Storage for the deprecated ``amount``, kept separate so the SDK's own
+    /// build does not trip the deprecation warning.
+    private let legacyAmount: Double
+
+    /// - Parameter amountDecimal: The exact amount. Pass it whenever you have
+    ///   the API's decimal string; the prebuilt sheet always does. It is never
+    ///   derived from `amount`. Defaults to `nil` so existing call sites
+    ///   compile unchanged.
     public init(
         paymentIntentId: String,
         paymentMethodType: String,
@@ -53,12 +77,14 @@ public struct PaymentResult {
         merchantOrderId: String? = nil,
         completedAt: Date? = nil,
         transactionId: String? = nil,
-        receiptUrl: String? = nil
+        receiptUrl: String? = nil,
+        amountDecimal: Decimal? = nil
     ) {
         self.paymentIntentId = paymentIntentId
         self.paymentMethodType = paymentMethodType
         self.status = status
-        self.amount = amount
+        self.legacyAmount = amount
+        self.amountDecimal = amountDecimal
         self.currency = currency
         self.metadata = metadata
         self.merchantOrderId = merchantOrderId
@@ -298,18 +324,20 @@ extension PaymentResult {
     public init(from response: ConfirmPaymentIntentResponse) {
         let status = PaymentStatus(intentStatus: response.intentStatus)
         let completedAt: Date? = (status == .succeeded || response.completeTime != nil) ? Date() : nil
+        let wireAmount = WireAmount.parse(response.amount, paymentIntentId: response.paymentIntentId)
 
         self.init(
             paymentIntentId: response.paymentIntentId,
             paymentMethodType: response.paymentMethod?.type ?? "unknown",
             status: status,
-            amount: Double(response.amount) ?? 0.0,
+            amount: wireAmount.double,
             currency: response.currency,
             metadata: response.metadata,
             merchantOrderId: response.merchantOrderId,
             completedAt: completedAt,
             transactionId: response.latestPaymentAttempt?.attemptId,
-            receiptUrl: nil
+            receiptUrl: nil,
+            amountDecimal: wireAmount.decimal
         )
     }
 }

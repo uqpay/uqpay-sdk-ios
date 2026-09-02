@@ -177,6 +177,7 @@ final class MidConfirmDismissalTests: XCTestCase {
         XCTAssertEqual(result.paymentIntentId, "pi_test_123")
         XCTAssertEqual(result.status, .succeeded)
         XCTAssertEqual(result.amount, 8.98, accuracy: 0.001)
+        XCTAssertEqual(result.amountDecimal, Decimal(string: "8.98"))
         XCTAssertEqual(result.currency, "SGD")
         XCTAssertEqual(result.merchantOrderId, "order_42")
         XCTAssertEqual(result.paymentMethodType, "card")

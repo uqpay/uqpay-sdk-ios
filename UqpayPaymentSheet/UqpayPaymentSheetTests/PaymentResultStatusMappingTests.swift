@@ -138,6 +138,7 @@ final class PaymentResultStatusMappingTests: XCTestCase {
 
         XCTAssertEqual(result.paymentIntentId, "pi_test_123")
         XCTAssertEqual(result.amount, 8.98)
+        XCTAssertEqual(result.amountDecimal, Decimal(string: "8.98"))
         XCTAssertEqual(result.currency, "SGD")
         XCTAssertEqual(result.merchantOrderId, "order_42")
         XCTAssertEqual(result.transactionId, "att_1")

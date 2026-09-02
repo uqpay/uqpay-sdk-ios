@@ -118,7 +118,7 @@ extension MerchantPaymentHandler: PaymentDelegate {
             report("""
                 Payment successful.
 
-                Amount: \(String(format: "%.2f", result.amount)) \(result.currency)
+                Amount: \(result.amountDecimal.map { "\($0)" } ?? "unknown") \(result.currency)
                 Method: \(result.paymentMethodType)
                 Intent: \(result.paymentIntentId)
                 """)
