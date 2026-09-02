@@ -265,23 +265,39 @@ public struct BankTransferDetails {
 // MARK: - Convenience Extensions
 
 extension PaymentResult {
-    /// Creates a PaymentResult from a ConfirmPaymentIntentResponse
+    /// Creates a PaymentResult from a ConfirmPaymentIntentResponse.
+    ///
+    /// The intent status is mapped exactly as the Global Acquiring API defines
+    /// it (Payment Intent status reference, v1.6):
+    ///
+    /// | API `intent_status`        | ``PaymentStatus``  |
+    /// |----------------------------|--------------------|
+    /// | `SUCCEEDED`                | `.succeeded`       |
+    /// | `REQUIRES_CAPTURE`         | `.succeeded` — "Authorization successful, waiting for capture. Funds are authorized but not yet settled." The same outcome the prebuilt sheet reports. |
+    /// | `REQUIRES_CUSTOMER_ACTION` | `.requiresAction`  |
+    /// | `PENDING`                  | `.pending`         |
+    /// | `CANCELLED`                | `.cancelled`       |
+    /// | `FAILED`                   | `.failed`          |
+    /// | `REQUIRES_PAYMENT_METHOD`  | `.failed` — on a confirm response this is the state after a failed attempt. |
+    ///
+    /// A status this SDK version does not recognise maps to `.failed`, which is
+    /// also what the prebuilt sheet reports for an unexpected status. Never
+    /// treat an unrecognised status as a success.
+    ///
+    /// What the result does **not** carry, and where to find it on `response`:
+    ///
+    /// - `.failed` has no reason attached. The decline or authentication code
+    ///   is on `response.latestPaymentAttempt?.failureCode`.
+    /// - `.requiresAction` means the customer still has a step to complete.
+    ///   The step (3DS redirect, iframe, QR code) is on `response.nextAction`.
+    ///
+    /// `completedAt` is set whenever the status is `.succeeded`, matching the
+    /// prebuilt sheet. The API only stamps `complete_time` once an intent
+    /// reaches a *final* state, so for `REQUIRES_CAPTURE` — authorised, not yet
+    /// settled — the field would otherwise be nil against a successful status.
     public init(from response: ConfirmPaymentIntentResponse) {
-        let status: PaymentStatus
-        switch response.intentStatus.uppercased() {
-        case "SUCCEEDED":
-            status = .succeeded
-        case "REQUIRES_ACTION":
-            status = .requiresAction
-        case "PROCESSING":
-            status = .processing
-        case "PENDING":
-            status = .pending
-        case "CANCELLED", "CANCELED":
-            status = .cancelled
-        default:
-            status = .failed
-        }
+        let status = PaymentStatus(intentStatus: response.intentStatus)
+        let completedAt: Date? = (status == .succeeded || response.completeTime != nil) ? Date() : nil
 
         self.init(
             paymentIntentId: response.paymentIntentId,
@@ -291,10 +307,40 @@ extension PaymentResult {
             currency: response.currency,
             metadata: response.metadata,
             merchantOrderId: response.merchantOrderId,
-            completedAt: response.completeTime != nil ? Date() : nil,
+            completedAt: completedAt,
             transactionId: response.latestPaymentAttempt?.attemptId,
             receiptUrl: nil
         )
+    }
+}
+
+extension PaymentStatus {
+    /// The merchant-facing status for a raw `intent_status` string.
+    ///
+    /// Matching is case-insensitive. Values are the seven documented intent
+    /// statuses; the pre-1.0 spellings `REQUIRES_ACTION`, `PROCESSING` and
+    /// `CANCELED` are still accepted so callers that produced them keep
+    /// getting the status they always did.
+    init(intentStatus raw: String) {
+        switch UqpayPaymentIntentStatus(rawValue: raw.uppercased()) {
+        case .succeeded, .requiresCapture:
+            self = .succeeded
+        case .requiresCustomerAction:
+            self = .requiresAction
+        case .pending:
+            self = .pending
+        case .cancelled:
+            self = .cancelled
+        case .failed, .requiresPaymentMethod:
+            self = .failed
+        case .unknown(let value):
+            switch value {
+            case "REQUIRES_ACTION": self = .requiresAction
+            case "PROCESSING": self = .processing
+            case "CANCELED": self = .cancelled
+            default: self = .failed
+            }
+        }
     }
 }
 

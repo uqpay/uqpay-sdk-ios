@@ -5,6 +5,29 @@ All notable changes to the UQPAY iOS SDK are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`PaymentResult(from:)` reported an authorised card payment as failed.**
+  The public initializer that turns a `ConfirmPaymentIntentResponse` into a
+  `PaymentResult` only recognised `SUCCEEDED`, `PENDING`, `CANCELLED` and two
+  spellings the API never returns; everything else — including
+  `REQUIRES_CAPTURE`, which the API defines as "Authorization successful,
+  waiting for capture", and `REQUIRES_CUSTOMER_ACTION` — fell through to
+  `.failed`. The prebuilt sheet was unaffected because it builds its result by
+  hand, so only merchants on the [low-level confirm
+  path](README.md#confirm-a-card-payment-yourself) who used this initializer
+  saw the wrong status. The mapping now follows the API's seven documented
+  intent statuses: `SUCCEEDED` and `REQUIRES_CAPTURE` → `.succeeded`,
+  `REQUIRES_CUSTOMER_ACTION` → `.requiresAction`, `PENDING` → `.pending`,
+  `CANCELLED` → `.cancelled`, `FAILED` and `REQUIRES_PAYMENT_METHOD` →
+  `.failed`. An unrecognised status still maps to `.failed`, never to a
+  success. `completedAt` is now set whenever the status is `.succeeded`, as
+  the prebuilt sheet already does — the API stamps `complete_time` only on a
+  final state, so an authorised-but-uncaptured payment would otherwise report
+  success with no completion time. Pinned by `PaymentResultStatusMappingTests`.
+
 ## [1.0.2] — 2026-08-14
 
 ### Changed

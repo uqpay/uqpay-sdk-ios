@@ -2249,9 +2249,10 @@ final class PaymentCardViewController: UIViewController {
         // UI below is never gated.
         if resolvedPaymentIntentIds.insert(response.paymentIntentId).inserted,
            let delegate = self.paymentDelegate {
-            // Built explicitly rather than via PaymentResult(from:), whose
-            // status mapping sends REQUIRES_CAPTURE to .failed — this method
-            // is only reached when the authorization succeeded.
+            // Built explicitly rather than via PaymentResult(from:) because
+            // this screen knows more than the response does: the method is
+            // "card" even when the response omits it, and the authorization
+            // completed *now*, whether or not `complete_time` is set yet.
             let paymentResult = PaymentResult(
                 paymentIntentId: response.paymentIntentId,
                 paymentMethodType: response.paymentMethod?.type ?? "card",
