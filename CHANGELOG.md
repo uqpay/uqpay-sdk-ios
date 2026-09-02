@@ -5,7 +5,7 @@ All notable changes to the UQPAY iOS SDK are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] — 2026-09-02
 
 What a merchant on 1.0.x sees after updating: nothing changes shape.
 `PaymentResult.amount` still works and now carries a deprecation warning;
@@ -525,6 +525,7 @@ QR wallet flows at this point.
 - Credentials are no longer read from hardcoded literals in example code;
   `DemoSecrets.plist` is git-ignored.
 
+[1.1.0]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.1.0
 [1.0.3]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.0.3
 [1.0.2]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.0.2
 [1.0.1]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.0.1

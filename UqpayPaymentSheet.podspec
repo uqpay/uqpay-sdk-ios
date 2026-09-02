@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UqpayPaymentSheet"
-  s.version               = "1.0.3"
+  s.version               = "1.1.0"
   s.summary               = "The prebuilt UQPAY payment UI: method list, card form, 3D Secure and QR wallets."
   s.description           = <<-DESC
                             UqpayPaymentSheet is the drop-in payment flow: the payment method

@@ -10,7 +10,7 @@ The SDK ships a prebuilt payment sheet you can present in a few lines, and a typ
 API client for integrations that need their own UI.
 
 > [!IMPORTANT]
-> **The current release is `1.0.3`.** The payment engine is sandbox-verified end
+> **The current release is `1.1.0`.** The payment engine is sandbox-verified end
 > to end for card 3DS and QR wallet flows, through both CocoaPods and Swift
 > Package Manager. A short list of documented constraints still applies — read
 > [Known limitations](#known-limitations) before you ship to production.
@@ -1072,7 +1072,7 @@ xcodebuild -workspace uqpay_ios_sdk.xcworkspace \
 
 ## Known limitations
 
-Honest list as of `1.0.3`. These are known and documented, not undiscovered —
+Honest list as of `1.1.0`. These are known and documented, not undiscovered —
 each has a stated workaround, and they are the priorities for the next release:
 
 | Area | Limitation |
