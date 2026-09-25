@@ -1528,7 +1528,7 @@ final class PaymentCardViewController: UIViewController {
         case "REQUIRES_CUSTOMER_ACTION":
             guard let nextAction = response.nextAction else {
                 UqpayLogger.shared.error("REQUIRES_CUSTOMER_ACTION with no next_action")
-                self.handleUnexpectedStatus(response.intentStatus, pendingVC: pendingVC)
+                self.settleUndrivableConfirm(response: response, marker: response.intentStatus, pendingVC: pendingVC)
                 return
             }
 
@@ -1754,7 +1754,7 @@ final class PaymentCardViewController: UIViewController {
 
             default:
                 UqpayLogger.shared.error("Unknown next_action type: \(nextAction.actionType)")
-                self.handleUnexpectedStatus("UNKNOWN_ACTION", pendingVC: pendingVC)
+                self.settleUndrivableConfirm(response: response, marker: "UNKNOWN_ACTION", pendingVC: pendingVC)
             }
 
         // MARK: - REQUIRES_CAPTURE
@@ -2315,6 +2315,101 @@ final class PaymentCardViewController: UIViewController {
             amount: amount,
             currency: currency
         )
+    }
+
+    // MARK: - Undrivable confirm answers
+
+    /// How many times, and how far apart, an undrivable confirm answer is
+    /// re-read before the sheet settles on pending. Internal so tests can
+    /// shorten the wait.
+    var undrivableSettleReads = 10
+    var undrivableSettleInterval: UInt64 = 2_000_000_000
+
+    /// Reads one intent; `nil` when the read fails. Internal so tests can
+    /// answer with fixtures instead of the network.
+    var readIntent: (String) async -> UqpayPaymentIntent? = { paymentIntentId in
+        try? await ApiClient.forConfiguredEnvironment().retrievePaymentIntent(paymentIntentId)
+    }
+
+    /// A confirm answer the sheet cannot act on: `REQUIRES_CUSTOMER_ACTION`
+    /// with no `next_action`, or with one of a type it does not know.
+    ///
+    /// The confirm has already reached the gateway, so this is not a failure.
+    /// Live, the UnionPay sandbox card answers exactly this and the intent
+    /// settles SUCCEEDED seconds later — and "Payment Failed / Try Again" on
+    /// this path told a customer who had paid to pay again. The customer now
+    /// sees "processing" while the intent is re-read, the server's status
+    /// decides the outcome, and an intent still in flight when the window
+    /// closes is reported pending and watched, never failed.
+    @MainActor
+    private func settleUndrivableConfirm(
+        response: ConfirmPaymentIntentResponse,
+        marker: String,
+        pendingVC: PaymentCardStatusViewController?
+    ) {
+        UqpayLogger.shared.info("Confirm answered \(marker); settling from the intent status")
+        let message = UqpayLocalized("Confirming your payment. This may take a few moments.")
+        if let pendingVC {
+            pendingVC.updateConfiguration(
+                PaymentStatusConfiguration(status: .processing, message: message),
+                animated: true
+            )
+        } else {
+            navigationController?.pushViewController(
+                PaymentCardStatusViewController.processing(message: message),
+                animated: true
+            )
+        }
+
+        let paymentIntentId = response.paymentIntentId
+        let reads = undrivableSettleReads
+        let interval = undrivableSettleInterval
+        let reader = readIntent
+        reconcileWatchTask?.cancel()
+        reconcileWatchTask = Task { [weak self] in
+            for read in 0..<reads {
+                if read > 0 { try? await Task.sleep(nanoseconds: interval) }
+                if Task.isCancelled { return }
+                let intent = await reader(paymentIntentId)
+                guard let self, !Task.isCancelled else { return }
+                if let intent, self.settleFromIntent(intent) { return }
+            }
+            guard let self, !Task.isCancelled else { return }
+            self.reportIndeterminateOutcome(
+                paymentIntentId: paymentIntentId,
+                statusVC: self.currentStatusVC(),
+                underlying: PaymentError(
+                    code: .unknown,
+                    message: "Confirm answered \(marker) and the intent had not settled.",
+                    declineCode: marker,
+                    paymentMethodType: "card"
+                ),
+                message: UqpayLocalized("Your payment is still being confirmed. ")
+                    + "Check your payment status before trying again."
+            )
+            self.watchUnsettledIntent(paymentIntentId: paymentIntentId, underlying: nil)
+        }
+    }
+
+    /// Reports an intent that has settled and answers whether it had.
+    /// A failed attempt on a live intent (`REQUIRES_PAYMENT_METHOD` with a
+    /// failure code, e.g. `3ds_failed`) is the gateway's decline and settles
+    /// as a failure; every other non-terminal status keeps the read going.
+    @MainActor
+    func settleFromIntent(_ intent: UqpayPaymentIntent) -> Bool {
+        switch intent.intentStatus {
+        case .succeeded, .requiresCapture:
+            reportReconciledSuccess(intent: intent, statusVC: currentStatusVC())
+            return true
+        case .failed, .cancelled:
+            reportReconciledFailure(intent: intent, statusVC: currentStatusVC(), underlying: nil)
+            return true
+        case .requiresPaymentMethod where ReconciledOutcome.failureCode(for: intent) != nil:
+            reportReconciledFailure(intent: intent, statusVC: currentStatusVC(), underlying: nil)
+            return true
+        default:
+            return false
+        }
     }
 
     private func handleUnexpectedStatus(_ status: String, pendingVC: PaymentCardStatusViewController?) {

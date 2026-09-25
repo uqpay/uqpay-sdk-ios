@@ -155,21 +155,78 @@ final class ConfirmStatusReportingTests: XCTestCase {
         XCTAssertEqual(delegate.failed.first?.declineCode, "SOMETHING_NEW")
     }
 
-    func testCustomerActionWithoutPayloadReportsFailure() {
-        // REQUIRES_CUSTOMER_ACTION with no next_action cannot proceed; it
-        // must surface as a failure, not silence.
+    // MARK: - Undrivable confirm answers settle from the server
+
+    /// Waits for the settle task, which reads on its own schedule.
+    private func waitForOutcome(_ count: Int = 1) async throws {
+        for _ in 0..<200 where delegate.totalOutcomes < count {
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+    }
+
+    private func settleWith(_ answers: [UqpayPaymentIntent?]) {
+        var remaining = answers
+        card.undrivableSettleReads = answers.count
+        card.undrivableSettleInterval = 0
+        card.readIntent = { _ in remaining.isEmpty ? nil : remaining.removeFirst() }
+    }
+
+    /// Live 2026-09-25 (UnionPay sandbox card, iPhone 12 Pro Max): the confirm
+    /// answered REQUIRES_CUSTOMER_ACTION with no next_action, the sheet showed
+    /// "Payment Failed / Try Again", and the intent was SUCCEEDED. The confirm
+    /// already left the device, so the server decides — never a guess.
+    func testCustomerActionWithoutPayloadSettlesAsTheServerSucceeded() async throws {
+        settleWith([intentFixture(status: "REQUIRES_CUSTOMER_ACTION"), intentFixture(status: "SUCCEEDED")])
+
         card.handleConfirmResponse(response(status: "REQUIRES_CUSTOMER_ACTION"))
+        XCTAssertEqual(delegate.failed.count, 0, "an undrivable answer is not a failure")
+
+        try await waitForOutcome()
+        XCTAssertEqual(delegate.completed.count, 1)
+        XCTAssertEqual(delegate.totalOutcomes, 1)
+    }
+
+    func testCustomerActionWithoutPayloadSettlesAsTheServerFailed() async throws {
+        settleWith([intentFixture(status: "FAILED")])
+
+        card.handleConfirmResponse(response(status: "REQUIRES_CUSTOMER_ACTION"))
+        try await waitForOutcome()
 
         XCTAssertEqual(delegate.failed.count, 1)
+        XCTAssertEqual(delegate.totalOutcomes, 1)
+    }
+
+    func testCustomerActionWithoutPayloadSettlesAFailedAttemptAsADecline() async throws {
+        settleWith([intentFixture(status: "REQUIRES_PAYMENT_METHOD", failureCode: "3ds_failed")])
+
+        card.handleConfirmResponse(response(status: "REQUIRES_CUSTOMER_ACTION"))
+        try await waitForOutcome()
+
+        XCTAssertEqual(delegate.failed.count, 1)
+        XCTAssertEqual(delegate.failed.first?.declineCode, "3ds_failed")
+    }
+
+    /// Unreadable or still in flight after the window: pending, never failed.
+    func testCustomerActionWithoutPayloadThatNeverSettlesReportsPending() async throws {
+        settleWith([nil, intentFixture(status: "REQUIRES_CUSTOMER_ACTION")])
+
+        card.handleConfirmResponse(response(status: "REQUIRES_CUSTOMER_ACTION"))
+        try await waitForOutcome()
+
+        XCTAssertEqual(delegate.pending.count, 1)
+        XCTAssertEqual(delegate.failed.count, 0, "an unknown outcome must never read as failure")
         XCTAssertEqual(delegate.totalOutcomes, 1)
     }
 
     // MARK: - Pre-confirm terminal-intent intercept
 
     /// `UqpayPaymentIntent` only decodes, and the wire is snake_case.
-    private func intentFixture(status: String) -> UqpayPaymentIntent {
+    private func intentFixture(status: String, failureCode: String? = nil) -> UqpayPaymentIntent {
+        let attempt = failureCode.map {
+            ", \"latest_payment_attempt\": {\"attempt_id\": \"att_1\", \"attempt_status\": \"FAILED\", \"failure_code\": \"\($0)\"}"
+        } ?? ""
         let json = """
-        {"payment_intent_id": "pi_test_123", "intent_status": "\(status)", "amount": "8.98", "currency": "SGD", "merchant_order_id": "order_42"}
+        {"payment_intent_id": "pi_test_123", "intent_status": "\(status)", "amount": "8.98", "currency": "SGD", "merchant_order_id": "order_42"\(attempt)}
         """
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
