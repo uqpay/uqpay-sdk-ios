@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UqpaySDKiOS"
-  s.version               = "1.1.0"
+  s.version               = "1.1.1"
   s.summary               = "Accept card payments and regional QR wallets in your iOS app with UQPAY."
   s.description           = <<-DESC
                             The UQPAY iOS SDK provides a prebuilt payment sheet for card payments
@@ -12,11 +12,11 @@ Pod::Spec.new do |s|
                             in `UqpayCore`, `UqpayPayments` and `UqpayPaymentSheet`. Depend on the
                             individual pods instead if you only need part of the SDK.
                             DESC
-  s.homepage              = "https://developer.uqpay.com"
+  s.homepage              = "https://developers.uqpay.com"
   s.license               = { :type => "MIT", :file => "LICENSE" }
   s.authors               = { "UQPAY" => "developer@uqpay.com" }
   s.source                = { :git => "https://github.com/uqpay/uqpay-sdk-ios.git", :tag => "#{s.version}" }
-  s.documentation_url     = "https://developer.uqpay.com"
+  s.documentation_url     = "https://developers.uqpay.com"
 
   s.platform              = :ios
   s.ios.deployment_target = "15.0"

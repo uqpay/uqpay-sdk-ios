@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "UqpayPayments"
-  s.version               = "1.1.0"
+  s.version               = "1.1.1"
   s.summary               = "Payment models, card validation and device info for the UQPAY iOS SDK."
   s.description           = <<-DESC
                             UqpayPayments carries the payment domain: intent and confirm
@@ -11,11 +11,11 @@ Pod::Spec.new do |s|
                             Most integrations should depend on `UqpaySDKiOS` instead, which pulls
                             this in along with the prebuilt payment sheet.
                             DESC
-  s.homepage              = "https://developer.uqpay.com"
+  s.homepage              = "https://developers.uqpay.com"
   s.license               = { :type => "MIT", :file => "LICENSE" }
   s.authors               = { "UQPAY" => "developer@uqpay.com" }
   s.source                = { :git => "https://github.com/uqpay/uqpay-sdk-ios.git", :tag => "#{s.version}" }
-  s.documentation_url     = "https://developer.uqpay.com"
+  s.documentation_url     = "https://developers.uqpay.com"
 
   s.platform              = :ios
   s.ios.deployment_target = "15.0"

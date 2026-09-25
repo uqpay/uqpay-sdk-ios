@@ -5,6 +5,28 @@ All notable changes to the UQPAY iOS SDK are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] — 2026-09-25
+
+What a merchant on 1.1.0 sees after updating: nothing changes shape. A card
+confirm the sheet could not act on is now settled from the server's intent
+status instead of being reported as a failure.
+
+### Fixed
+
+- **An undrivable confirm answer was reported as a failure.** When the confirm
+  call answered `REQUIRES_CUSTOMER_ACTION` with no `next_action`, or with a
+  `next_action` type the sheet does not know, the sheet showed "Payment Failed /
+  Try Again" and called `didFailWithError`. The confirm had already reached the
+  gateway, so this was a guess: the UnionPay sandbox card answers exactly this
+  and the intent settles `SUCCEEDED` seconds later, so a customer who had paid
+  was told to pay again. The sheet now shows a processing state, re-reads the
+  intent for up to twenty seconds, and reports what the server says: `SUCCEEDED`
+  and `REQUIRES_CAPTURE` as success, `FAILED` and `CANCELLED` as failure, a
+  failed attempt under `REQUIRES_PAYMENT_METHOD` as the gateway's decline with
+  its failure code, and an intent still in flight when the window closes as
+  pending, which the sheet keeps watching. An unknown outcome is never reported
+  as a failure.
+
 ## [1.1.0] — 2026-09-02
 
 What a merchant on 1.0.x sees after updating: nothing changes shape.
@@ -525,6 +547,7 @@ QR wallet flows at this point.
 - Credentials are no longer read from hardcoded literals in example code;
   `DemoSecrets.plist` is git-ignored.
 
+[1.1.1]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.1.1
 [1.1.0]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.1.0
 [1.0.3]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.0.3
 [1.0.2]: https://github.com/uqpay/uqpay-sdk-ios/releases/tag/1.0.2
