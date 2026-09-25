@@ -60,7 +60,7 @@ Table of contents
 - iOS 15.0+
 - Xcode 15.4+
 - Swift 5.9+
-- A UQPAY merchant account ([sandbox credentials](https://docs.uqpay.com))
+- A UQPAY merchant account ([sandbox credentials](https://developers.uqpay.com))
 
 ## Support matrix
 

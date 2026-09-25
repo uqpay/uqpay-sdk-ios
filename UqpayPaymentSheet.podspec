@@ -12,11 +12,11 @@ Pod::Spec.new do |s|
                             Most integrations should depend on `UqpaySDKiOS`, which pulls this in
                             along with its two dependencies.
                             DESC
-  s.homepage              = "https://docs.uqpay.com"
+  s.homepage              = "https://developers.uqpay.com"
   s.license               = { :type => "MIT", :file => "LICENSE" }
   s.authors               = { "UQPAY" => "developer@uqpay.com" }
   s.source                = { :git => "https://github.com/uqpay/uqpay-sdk-ios.git", :tag => "#{s.version}" }
-  s.documentation_url     = "https://docs.uqpay.com"
+  s.documentation_url     = "https://developers.uqpay.com"
 
   s.platform              = :ios
   s.ios.deployment_target = "15.0"
